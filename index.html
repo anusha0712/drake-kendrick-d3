@@ -538,55 +538,26 @@
 
                 } catch (error) {
                     console.error('❌ Error loading CSV:', error);
-                    console.log('⚠️ Falling back to sample data for demonstration');
-                    this.createSampleData();
-                    this.hideLoading();
-                    this.setupControls();
-                    this.createVisualization();
+                    this.showError(error.message);
                 }
             }
 
-            createSampleData() {
-                const categories = ['Personal attacks', 'Career criticisms', 'Cultural commentary', 'Skills/talent', 'Lifestyle'];
-                const subcategories = {
-                    'Personal attacks': ['Appearance', 'Family', 'Character'],
-                    'Career criticisms': ['Success', 'Authenticity', 'Collaborations'],
-                    'Cultural commentary': ['Industry', 'Hip-hop culture', 'Social issues'],
-                    'Skills/talent': ['Lyricism', 'Flow', 'Creativity'],
-                    'Lifestyle': ['Wealth', 'Relationships', 'Status']
-                };
-
-                this.data = [];
-                let id = 1;
-
-                categories.forEach(category => {
-                    const numDisses = Math.floor(Math.random() * 40) + 20;
-                    for (let i = 0; i < numDisses; i++) {
-                        const artist = Math.random() > 0.5 ? 'Kendrick' : 'Drake';
-                        const subcat = subcategories[category];
-                        this.data.push({
-                            artist: artist,
-                            category: category,
-                            diss: `Sample diss #${id}`,
-                            song: `Song ${id}`,
-                            releaseDate: '2024',
-                            streams: Math.floor(Math.random() * 1000000),
-                            subcategory: subcat[Math.floor(Math.random() * subcat.length)],
-                            releaseOrder: Math.random() * 10
-                        });
-                        id++;
-                    }
-                });
-
-                console.log(`📊 Created ${this.data.length} sample data points`);
-            }
+            
 
             hideLoading() {
                 d3.select('#loading').style('display', 'none');
             }
 
             setupControls() {
-                const categories = [...new Set(this.data.map(d => d.category))].sort();
+                // Count disses per category and sort by count (most to least)
+                const categoryCounts = {};
+                this.data.forEach(d => {
+                    categoryCounts[d.category] = (categoryCounts[d.category] || 0) + 1;
+                });
+
+                const categories = [...new Set(this.data.map(d => d.category))]
+                    .sort((a, b) => categoryCounts[b] - categoryCounts[a]); // Sort by count descending
+                
                 const controlsDiv = d3.select('.controls');
 
                 const buttonsContainer = controlsDiv.append('div')
