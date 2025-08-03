@@ -1,0 +1,1074 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>What Hurts The Male Ego? - Drake vs Kendrick Data Analysis</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #1a1a1a;
+            min-height: 100vh;
+            color: #ffffff;
+            overflow: hidden;
+        }
+
+        .container {
+            max-width: 100vw;
+            height: 100vh;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            text-align: center;
+            padding: 20px 20px 10px;
+            background: #1a1a1a;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 200;
+            color: #ffffff;
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            color: #888888;
+            margin: 0;
+            font-weight: 300;
+        }
+
+        .controls {
+            position: absolute;
+            top: 120px;
+            left: 20px;
+            z-index: 20;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-width: 180px;
+        }
+
+        .controls label {
+            font-weight: 500;
+            color: #ffffff;
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .category-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .category-btn {
+            padding: 8px 16px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 25px;
+            background: rgba(255, 255, 255, 0.05);
+            color: #cccccc;
+            font-size: 11px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            text-align: left;
+            width: 100%;
+        }
+
+        .category-btn:hover {
+            border-color: rgba(255, 255, 255, 0.4);
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            transform: translateX(3px);
+        }
+
+        .category-btn.active {
+            background: #6a1b9a;
+            border-color: #6a1b9a;
+            color: #ffffff;
+            transform: translateX(5px);
+        }
+
+        .subcategory-toggle {
+            margin-top: 15px;
+            padding: 8px 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .toggle-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            color: #cccccc;
+            font-size: 11px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            width: 100%;
+        }
+
+        .toggle-btn:hover {
+            border-color: rgba(255, 255, 255, 0.4);
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+        }
+
+        .toggle-btn.active {
+            background: #6a1b9a;
+            border-color: #6a1b9a;
+            color: #ffffff;
+        }
+
+        .toggle-switch {
+            width: 24px;
+            height: 12px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 6px;
+            position: relative;
+            transition: background 0.3s ease;
+        }
+
+        .toggle-switch.active {
+            background: #ffffff;
+        }
+
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: #ffffff;
+            border-radius: 50%;
+            top: 2px;
+            left: 2px;
+            transition: transform 0.3s ease;
+        }
+
+        .toggle-switch.active::after {
+            transform: translateX(12px);
+            background: #6a1b9a;
+        }
+
+        .viz-container {
+            flex: 1;
+            background: transparent;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .artist-labels {
+            position: absolute;
+            top: 20px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 250px;
+            pointer-events: none;
+            z-index: 10;
+            opacity: 0;
+            transition: opacity 0.6s ease;
+        }
+
+        .artist-labels.show-split {
+            opacity: 1;
+        }
+
+        .artist-label {
+            font-size: 1.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .kendrick-label {
+            color: #6a1b9a;
+            text-shadow: 0 2px 4px rgba(106, 27, 154, 0.3);
+        }
+
+        .drake-label {
+            color: #eab308;
+            text-shadow: 0 2px 4px rgba(234, 179, 8, 0.3);
+        }
+
+        .subcategory-labels {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+            z-index: 15;
+            opacity: 0;
+            transition: opacity 0.6s ease;
+        }
+
+        .subcategory-labels.show {
+            opacity: 1;
+        }
+
+        .subcategory-label {
+            position: absolute;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            padding: 8px 20px;
+            background: linear-gradient(135deg, rgba(40, 40, 40, 0.95) 0%, rgba(60, 60, 60, 0.95) 100%);
+            border-radius: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(10px);
+            text-align: center;
+            white-space: nowrap;
+            z-index: 20;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            transform: translateX(-50%);
+        }
+
+        .subcategory-label.center {
+            color: #ffffff;
+            border-color: rgba(255, 255, 255, 0.6);
+            background: linear-gradient(135deg, rgba(26, 26, 26, 0.98) 0%, rgba(50, 50, 50, 0.98) 100%);
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+        }
+
+        .subcategory-label.center:before {
+            content: '';
+            position: absolute;
+            top: -1px;
+            left: -1px;
+            right: -1px;
+            bottom: -1px;
+            background: linear-gradient(135deg, rgba(106, 27, 154, 0.3) 0%, rgba(234, 179, 8, 0.3) 100%);
+            border-radius: 20px;
+            z-index: -1;
+        }
+
+        .subcategory-label.kendrick {
+            color: #6a1b9a;
+            border-color: rgba(106, 27, 154, 0.5);
+            background: rgba(106, 27, 154, 0.1);
+        }
+
+        .subcategory-label.drake {
+            color: #eab308;
+            border-color: rgba(234, 179, 8, 0.5);
+            background: rgba(234, 179, 8, 0.1);
+        }
+
+        .bubble {
+            cursor: pointer;
+            transition: stroke 0.2s ease, stroke-width 0.2s ease;
+        }
+
+        .bubble:hover {
+            stroke: #ffffff;
+            stroke-width: 2;
+        }
+
+        .tooltip {
+            position: absolute;
+            background: rgba(26, 26, 26, 0.95);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            font-size: 14px;
+            line-height: 1.6;
+            max-width: 400px;
+            pointer-events: none;
+            z-index: 1000;
+            opacity: 0;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .tooltip-diss {
+            font-style: italic;
+            margin-bottom: 12px;
+            padding-left: 15px;
+            font-size: 16px;
+            font-weight: 300;
+            border-left: 4px solid var(--artist-color);
+        }
+
+        .tooltip-meta {
+            font-size: 13px;
+            color: #cccccc;
+            line-height: 1.5;
+        }
+
+        .tooltip-meta strong {
+            color: var(--artist-color);
+        }
+
+        .stats {
+            position: absolute;
+            bottom: 30px;
+            right: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            padding: 0;
+            background: transparent;
+        }
+
+        .stat {
+            text-align: right;
+            padding: 8px 0;
+            background: transparent;
+        }
+
+        .stat-number {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 2px;
+            line-height: 1;
+        }
+
+        .stat-label {
+            font-size: 0.7rem;
+            color: #888888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 500;
+            line-height: 1;
+        }
+
+        .kendrick-stat {
+            color: #6a1b9a;
+        }
+
+        .drake-stat {
+            color: #eab308;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 100px;
+            color: #888888;
+            font-size: 1.2rem;
+        }
+
+        .error-message {
+            text-align: center;
+            padding: 60px;
+            color: #e74c3c;
+            background: rgba(231, 76, 60, 0.1);
+            border-radius: 15px;
+            margin: 20px;
+            border: 1px solid rgba(231, 76, 60, 0.2);
+        }
+
+        .error-message h3 {
+            margin-bottom: 15px;
+            color: #e74c3c;
+        }
+
+        
+        .subcategory-label {
+            -webkit-backdrop-filter: blur(10px); /* Safari */
+            backdrop-filter: blur(10px); /* Chrome */
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .artist-labels {
+                padding: 0 100px;
+            }
+
+            .artist-label {
+                font-size: 1.4rem;
+            }
+
+            .controls {
+                left: 15px;
+                max-width: 150px;
+            }
+
+            .stats {
+                bottom: 20px;
+                right: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>What Hurts The Male Ego?</h1>
+            <p>A data-driven analysis of contemporary hip-hop's most iconic rivalry</p>
+        </div>
+
+        <div class="controls">
+            <label>Categories</label>
+        </div>
+
+        <div class="viz-container">
+            <div class="artist-labels" id="artistLabels">
+                <div class="artist-label kendrick-label">KENDRICK</div>
+                <div class="artist-label drake-label">DRAKE</div>
+            </div>
+            <svg id="bubbleChart"></svg>
+            <div class="loading" id="loading">Loading visualization...</div>
+        </div>
+
+        <div class="stats" id="stats">
+            <div class="stat">
+                <div class="stat-number kendrick-stat" id="kendrickCount">0</div>
+                <div class="stat-label">KENDRICK DISSES</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number drake-stat" id="drakeCount">0</div>
+                <div class="stat-label">DRAKE DISSES</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number" id="totalCount">0</div>
+                <div class="stat-label">TOTAL DISSES</div>
+            </div>
+        </div>
+
+        <div class="tooltip" id="tooltip"></div>
+    </div>
+
+    <script>
+        class DrakeKendrickVisualization {
+            constructor() {
+                this.data = null;
+                this.filteredData = null;
+                this.bubbles = null;
+                this.width = window.innerWidth;
+                this.height = window.innerHeight;
+                this.radius = 8; 
+                this.currentMode = 'all';
+                this.showSubcategories = false;
+                this.currentCategory = 'all';
+
+                this.colors = {
+                    kendrick: '#6a1b9a',
+                    drake: '#eab308'
+                };
+
+                this.init();
+            }
+
+            async init() {
+                this.setupSVG();
+                this.setupTooltip();
+                await this.loadData();
+
+                
+                window.addEventListener('resize', () => {
+                    this.width = window.innerWidth;
+                    this.height = window.innerHeight;
+                    this.svg.attr('width', this.width).attr('height', this.height);
+                    this.updateLayout();
+                });
+            }
+
+            setupSVG() {
+                this.svg = d3.select('#bubbleChart')
+                    .attr('width', this.width)
+                    .attr('height', this.height);
+            }
+
+            setupTooltip() {
+                this.tooltip = d3.select('#tooltip');
+            }
+
+            async loadData() {
+                try {
+                    console.log('Loading CSV data...');
+
+                    this.data = await d3.csv('drake_kendrick_disses.csv', d => {
+                        const cleanData = {
+                            artist: String(d.Artist || '').trim(),
+                            category: String(d.Category || '').trim(),
+                            diss: String(d.Diss || '').trim(),
+                            song: String(d.Name || '').trim(),
+                            releaseDate: String(d['Release Date'] || '').trim(),
+                            streams: +d.Streams || 0,
+                            subcategory: String(d.Subcategory || '').trim(),
+                            releaseOrder: +d['Release Order'] || 0
+                        };
+
+                        if (cleanData.artist && cleanData.category && cleanData.diss && cleanData.song) {
+                            return cleanData;
+                        }
+                        return null;
+                    });
+
+                    this.data = this.data.filter(d => d !== null);
+
+                    console.log(`✅ Data loaded successfully: ${this.data.length} disses`);
+
+                    if (this.data.length === 0) {
+                        throw new Error('No valid data found in CSV file');
+                    }
+
+                    this.hideLoading();
+                    this.setupControls();
+                    this.createVisualization();
+
+                } catch (error) {
+                    console.error('❌ Error loading CSV:', error);
+                    console.log('⚠️ Falling back to sample data for demonstration');
+                    this.createSampleData();
+                    this.hideLoading();
+                    this.setupControls();
+                    this.createVisualization();
+                }
+            }
+
+            createSampleData() {
+                const categories = ['Personal attacks', 'Career criticisms', 'Cultural commentary', 'Skills/talent', 'Lifestyle'];
+                const subcategories = {
+                    'Personal attacks': ['Appearance', 'Family', 'Character'],
+                    'Career criticisms': ['Success', 'Authenticity', 'Collaborations'],
+                    'Cultural commentary': ['Industry', 'Hip-hop culture', 'Social issues'],
+                    'Skills/talent': ['Lyricism', 'Flow', 'Creativity'],
+                    'Lifestyle': ['Wealth', 'Relationships', 'Status']
+                };
+
+                this.data = [];
+                let id = 1;
+
+                categories.forEach(category => {
+                    const numDisses = Math.floor(Math.random() * 40) + 20;
+                    for (let i = 0; i < numDisses; i++) {
+                        const artist = Math.random() > 0.5 ? 'Kendrick' : 'Drake';
+                        const subcat = subcategories[category];
+                        this.data.push({
+                            artist: artist,
+                            category: category,
+                            diss: `Sample diss #${id}`,
+                            song: `Song ${id}`,
+                            releaseDate: '2024',
+                            streams: Math.floor(Math.random() * 1000000),
+                            subcategory: subcat[Math.floor(Math.random() * subcat.length)],
+                            releaseOrder: Math.random() * 10
+                        });
+                        id++;
+                    }
+                });
+
+                console.log(`📊 Created ${this.data.length} sample data points`);
+            }
+
+            hideLoading() {
+                d3.select('#loading').style('display', 'none');
+            }
+
+            setupControls() {
+                const categories = [...new Set(this.data.map(d => d.category))].sort();
+                const controlsDiv = d3.select('.controls');
+
+                const buttonsContainer = controlsDiv.append('div')
+                    .attr('class', 'category-buttons');
+
+                
+                buttonsContainer.append('button')
+                    .attr('class', 'category-btn active')
+                    .attr('data-category', 'all')
+                    .text('All')
+                    .on('click', () => this.handleCategoryClick('all'));
+
+                
+                categories.forEach(category => {
+                    buttonsContainer.append('button')
+                        .attr('class', 'category-btn')
+                        .attr('data-category', category)
+                        .text(category)
+                        .on('click', () => this.handleCategoryClick(category));
+                });
+
+               
+                const toggleContainer = controlsDiv.append('div')
+                    .attr('class', 'subcategory-toggle');
+
+                const toggleBtn = toggleContainer.append('div')
+                    .attr('class', 'toggle-btn')
+                    .on('click', () => this.toggleSubcategories());
+
+                toggleBtn.append('span')
+                    .text('Show Subcategories');
+
+                toggleBtn.append('div')
+                    .attr('class', 'toggle-switch')
+                    .attr('id', 'subcategoryToggle');
+            }
+
+            toggleSubcategories() {
+                this.showSubcategories = !this.showSubcategories;
+
+                const toggle = d3.select('#subcategoryToggle');
+                const toggleBtn = d3.select('.toggle-btn');
+
+                if (this.showSubcategories) {
+                    toggle.classed('active', true);
+                    toggleBtn.classed('active', true);
+                } else {
+                    toggle.classed('active', false);
+                    toggleBtn.classed('active', false);
+                }
+
+                console.log(`🔄 Subcategories ${this.showSubcategories ? 'ON' : 'OFF'}`);
+
+                if (this.currentMode === 'split') {
+                    this.updateLayout();
+                }
+            }
+
+            handleCategoryClick(category) {
+                d3.selectAll('.category-btn').classed('active', false);
+                d3.select(`[data-category="${category}"]`).classed('active', true);
+                this.currentCategory = category;
+
+                
+                this.showSubcategories = false;
+                const toggle = d3.select('#subcategoryToggle');
+                const toggleBtn = d3.select('.toggle-btn');
+                toggle.classed('active', false);
+                toggleBtn.classed('active', false);
+
+                this.filterByCategory(category);
+            }
+
+            createVisualization() {
+                console.log(`🚀 Creating visualization with ${this.data.length} total disses`);
+
+                this.filteredData = [...this.data];
+                this.currentMode = 'all';
+                this.svg.attr('width', this.width).attr('height', this.height);
+
+                this.createBubblesInitial();
+                this.updateStats();
+            }
+
+            createBubblesInitial() {
+                console.log(`🔄 Creating initial ${this.filteredData.length} bubbles`);
+
+                
+                const visualWidth = this.width - 300;
+                const visualHeight = this.height - 90;
+                const packSize = Math.min(visualWidth, visualHeight - 50);
+
+                const pack = d3.pack()
+                    .size([packSize, packSize])
+                    .padding(5); 
+
+                const root = d3.hierarchy({ children: this.filteredData }).sum(d => 1);
+                pack(root);
+
+                
+                const offsetX = (this.width - packSize) / 2;
+                const offsetY = 0; 
+
+                this.svg.selectAll('.bubble').remove();
+
+                this.bubbles = this.svg.selectAll('.bubble')
+                    .data(this.filteredData, d => `${d.diss}-${d.artist}-${d.song}-${d.category}`)
+                    .enter()
+                    .append('circle')
+                    .attr('class', 'bubble')
+                    .attr('r', this.radius)
+                    .attr('cx', (d, i) => {
+                        if (root.children && root.children[i]) {
+                            return root.children[i].x + offsetX;
+                        }
+                        return offsetX + packSize / 2;
+                    })
+                    .attr('cy', (d, i) => {
+                        if (root.children && root.children[i]) {
+                            return root.children[i].y + offsetY;
+                        }
+                        return offsetY + packSize / 2;
+                    })
+                    .attr('fill', d => this.colors[d.artist.toLowerCase()])
+                    .attr('opacity', 0.9)
+                    .style('pointer-events', 'all')
+                    .on('mouseover', (event, d) => this.showTooltip(event, d))
+                    .on('mousemove', (event) => this.moveTooltip(event))
+                    .on('mouseout', () => this.hideTooltip());
+
+                console.log(`✅ Created ${this.bubbles.size()} bubbles in packed layout`);
+                d3.select('#artistLabels').classed('show-split', false);
+            }
+
+            filterByCategory(category) {
+                console.log(`🔄 Filtering by: ${category}`);
+
+                if (category === 'all') {
+                    this.filteredData = [...this.data];
+                    this.currentMode = 'all';
+                    d3.select('.viz-container').selectAll('.subcategory-labels').remove();
+                    this.createBubblesInitial();
+                } else {
+                    this.filteredData = this.data.filter(d => d.category === category);
+                    this.currentMode = 'split';
+                    this.updateBubbles();
+                    setTimeout(() => this.updateLayout(), 100);
+                }
+
+                this.updateStats();
+            }
+
+            updateBubbles() {
+                const bubbles = this.svg.selectAll('.bubble')
+                    .data(this.filteredData, d => `${d.diss}-${d.artist}-${d.song}-${d.category}`);
+
+                bubbles.exit()
+                    .transition()
+                    .duration(300)
+                    .attr('opacity', 0)
+                    .remove();
+
+                const newBubbles = bubbles.enter()
+                    .append('circle')
+                    .attr('class', 'bubble')
+                    .attr('r', this.radius)
+                    .attr('cx', this.width / 2)
+                    .attr('cy', this.height / 2)
+                    .attr('fill', d => this.colors[d.artist.toLowerCase()])
+                    .attr('opacity', 0)
+                    .style('pointer-events', 'all')
+                    .on('mouseover', (event, d) => this.showTooltip(event, d))
+                    .on('mousemove', (event) => this.moveTooltip(event))
+                    .on('mouseout', () => this.hideTooltip());
+
+                newBubbles.transition()
+                    .duration(300)
+                    .attr('opacity', 0.9);
+
+                this.bubbles = bubbles.merge(newBubbles);
+            }
+
+            updateLayout() {
+                if (this.currentMode === 'all') {
+                    this.createPackedLayout();
+                } else {
+                    this.createSplitLayout();
+                }
+            }
+
+            createPackedLayout() {
+                const visualWidth = this.width - 400;
+                const visualHeight = this.height - 120; 
+                const packSize = Math.min(visualWidth, visualHeight - 80);
+
+                const pack = d3.pack()
+                    .size([packSize, packSize])
+                    .padding(3); 
+
+                const root = d3.hierarchy({ children: this.filteredData }).sum(d => 1);
+                pack(root);
+
+                const offsetX = (this.width - packSize) / 2;
+                const offsetY = 120 + (this.height - 120 - packSize) / 2; 
+
+                this.bubbles.each(function (d, i) {
+                    const bubble = d3.select(this);
+                    let targetX, targetY;
+
+                    if (root.children && root.children[i]) {
+                        targetX = root.children[i].x + offsetX;
+                        targetY = root.children[i].y + offsetY;
+                    } else {
+                        targetX = offsetX + packSize / 2;
+                        targetY = offsetY + packSize / 2;
+                    }
+
+                    bubble.transition()
+                        .duration(800)
+                        .ease(d3.easeQuadInOut)
+                        .attr('cx', targetX)
+                        .attr('cy', targetY)
+                        .attr('opacity', 0.9);
+                });
+
+                d3.select('#artistLabels').classed('show-split', false);
+            }
+
+            createSplitLayout() {
+                const kendrickData = this.filteredData.filter(d => d.artist === 'Kendrick');
+                const drakeData = this.filteredData.filter(d => d.artist === 'Drake');
+
+                
+                d3.select('.viz-container').selectAll('.subcategory-labels').remove();
+
+                if (this.showSubcategories) {
+                    this.createSubcategoryLayout(kendrickData, drakeData);
+                } else {
+                    this.createSimpleSplitLayout(kendrickData, drakeData);
+                }
+
+                d3.select('#artistLabels').classed('show-split', true);
+            }
+
+            createSimpleSplitLayout(kendrickData, drakeData) {
+                
+                const centerX = this.width / 2;
+                const kendrickCenterX = centerX - 200; 
+                const drakeCenterX = centerX + 200; 
+                const centerY = 300; 
+
+                const packSize = Math.min(300, this.height - 300); 
+                const pack = d3.pack().size([packSize, packSize]).padding(6); 
+
+                let kendrickRoot = null, drakeRoot = null;
+
+                if (kendrickData.length > 0) {
+                    kendrickRoot = d3.hierarchy({ children: kendrickData }).sum(d => 1);
+                    pack(kendrickRoot);
+                }
+
+                if (drakeData.length > 0) {
+                    drakeRoot = d3.hierarchy({ children: drakeData }).sum(d => 1);
+                    pack(drakeRoot);
+                }
+
+                this.positionBubbles(kendrickData, drakeData, kendrickRoot, drakeRoot,
+                    kendrickCenterX, drakeCenterX, centerY, packSize);
+            }
+
+            positionBubbles(kendrickData, drakeData, kendrickRoot, drakeRoot, kendrickCenterX, drakeCenterX, centerY, packSize) {
+                this.bubbles.each(function (d, i) {
+                    const bubble = d3.select(this);
+                    let targetX, targetY;
+
+                    if (d.artist === 'Kendrick') {
+                        if (kendrickRoot?.children) {
+                            const index = kendrickData.findIndex(k =>
+                                k.diss === d.diss && k.song === d.song && k.category === d.category
+                            );
+                            if (index >= 0 && kendrickRoot.children[index]) {
+                                targetX = kendrickRoot.children[index].x + (kendrickCenterX - packSize / 2);
+                                targetY = kendrickRoot.children[index].y + (centerY - packSize / 2);
+                            } else {
+                                targetX = kendrickCenterX;
+                                targetY = centerY;
+                            }
+                        } else {
+                            targetX = kendrickCenterX;
+                            targetY = centerY;
+                        }
+                    } else {
+                        if (drakeRoot?.children) {
+                            const index = drakeData.findIndex(dr =>
+                                dr.diss === d.diss && dr.song === d.song && dr.category === d.category
+                            );
+                            if (index >= 0 && drakeRoot.children[index]) {
+                                targetX = drakeRoot.children[index].x + (drakeCenterX - packSize / 2);
+                                targetY = drakeRoot.children[index].y + (centerY - packSize / 2);
+                            } else {
+                                targetX = drakeCenterX;
+                                targetY = centerY;
+                            }
+                        } else {
+                            targetX = drakeCenterX;
+                            targetY = centerY;
+                        }
+                    }
+
+                    bubble.transition()
+                        .duration(800)
+                        .ease(d3.easeQuadInOut)
+                        .attr('cx', targetX)
+                        .attr('cy', targetY)
+                        .attr('opacity', 0.9);
+                });
+            }
+
+            createSubcategoryLayout(kendrickData, drakeData) {
+                const kendrickSubcats = d3.group(kendrickData, d => d.subcategory);
+                const drakeSubcats = d3.group(drakeData, d => d.subcategory);
+
+                const labelsContainer = d3.select('.viz-container')
+                    .append('div')
+                    .attr('class', 'subcategory-labels show');
+
+                this.layoutSubcategoryGroups(kendrickSubcats, drakeSubcats, labelsContainer);
+            }
+
+            layoutSubcategoryGroups(kendrickSubcats, drakeSubcats, labelsContainer) {
+                
+                const allSubcategories = new Set([
+                    ...kendrickSubcats.keys(),
+                    ...drakeSubcats.keys()
+                ]);
+
+                const centerX = this.width / 2;
+                const startY = 150; 
+                const rowHeight = 140; 
+
+                let bubblePositions = [];
+
+                console.log(`🏷️ Creating centered subcategory layout for ${allSubcategories.size} subcategories`);
+
+                
+                Array.from(allSubcategories).forEach((subcat, i) => {
+                    const rowY = startY + (i * rowHeight);
+                    const kendrickData = kendrickSubcats.get(subcat) || [];
+                    const drakeData = drakeSubcats.get(subcat) || [];
+
+                    
+                    const labelX = centerX;
+                    const labelY = rowY - 30;
+
+                    labelsContainer.append('div')
+                        .attr('class', 'subcategory-label center')
+                        .style('left', labelX + 'px') 
+                        .style('top', labelY + 'px')
+                        .text(subcat);
+
+                    
+                    if (kendrickData.length > 0) {
+                        const kendrickGroupSize = Math.min(150, 60 + kendrickData.length * 3);
+                        const kendrickPack = d3.pack().size([kendrickGroupSize, kendrickGroupSize]).padding(6);
+                        const kendrickRoot = d3.hierarchy({ children: kendrickData }).sum(d => 1);
+                        kendrickPack(kendrickRoot);
+
+                        const kendrickCenterX = centerX - 330; 
+
+                        kendrickData.forEach((d, j) => {
+                            if (kendrickRoot.children && kendrickRoot.children[j]) {
+                                bubblePositions.push({
+                                    data: d,
+                                    x: kendrickRoot.children[j].x + kendrickCenterX - kendrickGroupSize / 2,
+                                    y: kendrickRoot.children[j].y + rowY - kendrickGroupSize / 2
+                                });
+                            }
+                        });
+                    }
+
+                    
+                    if (drakeData.length > 0) {
+                        const drakeGroupSize = Math.min(150, 60 + drakeData.length * 3);
+                        const drakePack = d3.pack().size([drakeGroupSize, drakeGroupSize]).padding(6);
+                        const drakeRoot = d3.hierarchy({ children: drakeData }).sum(d => 1);
+                        drakePack(drakeRoot);
+
+                        const drakeCenterX = centerX + 350; 
+
+                        drakeData.forEach((d, j) => {
+                            if (drakeRoot.children && drakeRoot.children[j]) {
+                                bubblePositions.push({
+                                    data: d,
+                                    x: drakeRoot.children[j].x + drakeCenterX - drakeGroupSize / 2,
+                                    y: drakeRoot.children[j].y + rowY - drakeGroupSize / 2
+                                });
+                            }
+                        });
+                    }
+                });
+
+                
+                this.bubbles.each(function (d) {
+                    const bubble = d3.select(this);
+                    const position = bubblePositions.find(p =>
+                        p.data.diss === d.diss &&
+                        p.data.song === d.song &&
+                        p.data.artist === d.artist
+                    );
+
+                    if (position) {
+                        bubble.transition()
+                            .duration(800)
+                            .ease(d3.easeQuadInOut)
+                            .attr('cx', position.x)
+                            .attr('cy', position.y)
+                            .attr('r', 6) 
+                            .attr('opacity', 0.9);
+                    }
+                });
+            }
+
+            showTooltip(event, d) {
+                const artistColor = this.colors[d.artist.toLowerCase()];
+
+                this.tooltip
+                    .style('--artist-color', artistColor)
+                    .html(`
+                        <div class="tooltip-diss">"${d.diss}"</div>
+                        <div class="tooltip-meta">
+                            <strong>Artist:</strong> ${d.artist}<br>
+                            <strong>Song:</strong> ${d.song}<br>
+                            <strong>Category:</strong> ${d.category}<br>
+                            <strong>Release Date:</strong> ${d.releaseDate}
+                        </div>
+                    `)
+                    .style('opacity', 1);
+
+                this.moveTooltip(event);
+            }
+
+            moveTooltip(event) {
+                const tooltipWidth = 400;
+                const tooltipHeight = 150;
+
+                let left = event.pageX + 15;
+                let top = event.pageY - tooltipHeight / 2;
+
+                if (left + tooltipWidth > window.innerWidth) {
+                    left = event.pageX - tooltipWidth - 15;
+                }
+
+                if (top < 0) top = 10;
+                if (top + tooltipHeight > window.innerHeight) {
+                    top = window.innerHeight - tooltipHeight - 10;
+                }
+
+                this.tooltip
+                    .style('left', left + 'px')
+                    .style('top', top + 'px');
+            }
+
+            hideTooltip() {
+                this.tooltip.style('opacity', 0);
+            }
+
+            updateStats() {
+                const kendrickCount = this.filteredData.filter(d => d.artist === 'Kendrick').length;
+                const drakeCount = this.filteredData.filter(d => d.artist === 'Drake').length;
+                const totalCount = this.filteredData.length;
+
+                d3.select('#kendrickCount').text(kendrickCount);
+                d3.select('#drakeCount').text(drakeCount);
+                d3.select('#totalCount').text(totalCount);
+
+                console.log(`📊 Stats updated: Kendrick ${kendrickCount}, Drake ${drakeCount}, Total ${totalCount}`);
+            }
+        }
+
+        
+        const viz = new DrakeKendrickVisualization();
+    </script>
+</body>
+
+</html>
