@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>What Hurts The Male Ego? - Drake vs Kendrick Data Analysis</title>
+    <title>Drake vs Kendrick - What Hurts The Male Ego?</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
     <style>
         * {
@@ -179,12 +179,12 @@
         
         .artist-labels {
             position: absolute;
-            top: 60px;
+            top: 20px;
             left: 0;
             right: 0;
             display: flex;
-            justify-content: center;
-            gap: 600px;
+            justify-content: space-between;
+            padding: 0 250px;
             pointer-events: none;
             z-index: 10;
             opacity: 0;
@@ -338,12 +338,12 @@
             position: absolute;
             top: 30px;
             right: 30px;
-            padding: 8px 16px;
+            padding: 12px 24px;
             border: 1px solid rgba(255, 255, 255, 0.2);
             border-radius: 25px;
             background: rgba(255, 255, 255, 0.05);
             color: #cccccc;
-            font-size: 11px;
+            font-size: 15px;
             font-weight: 500;
             cursor: pointer;
             transition: all 0.3s ease;
@@ -396,7 +396,7 @@
 
         .help-content h2 {
             color: #ffffff;
-            font-size: 1.8rem;
+            font-size: 2.0rem;
             font-weight: 700;
             margin-bottom: 25px;
             text-align: center;
@@ -409,7 +409,7 @@
             color: #cccccc;
             line-height: 1.6;
             margin-bottom: 16px;
-            font-size: 0.95rem;
+            font-size: 1.1rem;
             font-weight: 300;
         }
 
@@ -522,7 +522,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>What Hurts The Male Ego?</h1>
+            <h1>Drake vs Kendrick - What Hurts The Male Ego?</h1>
             <p>A data-driven analysis of contemporary hip-hop's most iconic rivalry</p>
         </div>
         
@@ -530,7 +530,7 @@
             <label>Categories</label>
         </div>
 
-        <button class="help-button" id="helpButton">How to Use This</button>
+        <button class="help-button" id="helpButton">How To Explore This Data</button>
         
         <div class="viz-container">
             <div class="artist-labels" id="artistLabels">
@@ -561,7 +561,7 @@
         <div class="help-modal" id="helpModal">
             <div class="help-content">
                 <button class="close-button" id="closeButton">&times;</button>
-                <h2>Understanding the Drake vs Kendrick Feud Data</h2>
+                <h2>How To Explore This Data</h2>
                 
                 <p><strong>What This Visualization Shows</strong></p>
                 <p>This interactive analysis examines 576 documented disses from the ongoing Drake vs Kendrick Lamar 
@@ -733,7 +733,15 @@
             }
             
             setupControls() {
-                const categories = [...new Set(this.data.map(d => d.category))].sort();
+                
+                const categoryCounts = {};
+                this.data.forEach(d => {
+                    categoryCounts[d.category] = (categoryCounts[d.category] || 0) + 1;
+                });
+
+                const categories = [...new Set(this.data.map(d => d.category))]
+                    .sort((a, b) => categoryCounts[b] - categoryCounts[a]); 
+
                 const controlsDiv = d3.select('.controls');
                 
                 const buttonsContainer = controlsDiv.append('div')
@@ -982,7 +990,7 @@
                 const centerX = this.width / 2;
                 const kendrickCenterX = centerX - 200; 
                 const drakeCenterX = centerX + 200; 
-                const centerY = 200; 
+                const centerY = 330; 
                 
                 const packSize = Math.min(300, this.height - 300); 
                 const pack = d3.pack().size([packSize, packSize]).padding(6); 
@@ -1070,8 +1078,8 @@
                 ]);
                 
                 const centerX = this.width / 2;
-                const startY = 180; 
-                const rowHeight = 120; 
+                const startY = 150; 
+                const rowHeight = 140; 
                 
                 let bubblePositions = [];
                 
@@ -1100,7 +1108,7 @@
                         const kendrickRoot = d3.hierarchy({children: kendrickData}).sum(d => 1);
                         kendrickPack(kendrickRoot);
                         
-                        const kendrickCenterX = centerX - 150; 
+                        const kendrickCenterX = centerX - 330; 
                         
                         kendrickData.forEach((d, j) => {
                             if (kendrickRoot.children && kendrickRoot.children[j]) {
@@ -1120,7 +1128,7 @@
                         const drakeRoot = d3.hierarchy({children: drakeData}).sum(d => 1);
                         drakePack(drakeRoot);
                         
-                        const drakeCenterX = centerX + 150; 
+                        const drakeCenterX = centerX + 350; 
                         
                         drakeData.forEach((d, j) => {
                             if (drakeRoot.children && drakeRoot.children[j]) {
@@ -1149,6 +1157,7 @@
                             .ease(d3.easeQuadInOut)
                             .attr('cx', position.x)
                             .attr('cy', position.y)
+                            .attr('r', 6)
                             .attr('opacity', 0.9);
                     }
                 });
