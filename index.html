@@ -567,7 +567,7 @@
                 <p>This interactive analysis examines 576 documented disses from the ongoing Drake vs Kendrick Lamar 
                     rivalry, one of hip-hop's most significant feuds. Each bubble represents a single diss or insult 
                     found within the lyrics of ten key songs from both artists.</p>
-                <p> The main of this project is to understand the topics that are typically weaponised, in this case by two men, 
+                <p> The main aim of this project is to understand the topics that are typically weaponised, in this case by two men, 
                     in their very public feud. To me it was interesting (to say that least) to watch allegations of infidelity, domestic abuse, 
                     misogyny and most of all pedophilia be thrown around with blatant casual flair so much so that they were immortalized in
                     cultural history. What are we celebrating when we sing along to these lyrics? Does a catchy beat or mere talent entitle artists 
@@ -612,7 +612,7 @@
                 this.bubbles = null;
                 this.width = window.innerWidth;
                 this.height = window.innerHeight;
-                this.radius = 8; // Even larger bubbles
+                this.radius = 8; 
                 this.currentMode = 'all';
                 this.showSubcategories = false;
                 this.currentCategory = 'all';
@@ -630,7 +630,7 @@
                 this.setupTooltip();
                 await this.loadData();
                 
-                // Handle window resize
+                
                 window.addEventListener('resize', () => {
                     this.width = window.innerWidth;
                     this.height = window.innerHeight;
@@ -739,14 +739,14 @@
                 const buttonsContainer = controlsDiv.append('div')
                     .attr('class', 'category-buttons');
                 
-                // Add "All" button
+                
                 buttonsContainer.append('button')
                     .attr('class', 'category-btn active')
                     .attr('data-category', 'all')
                     .text('All')
                     .on('click', () => this.handleCategoryClick('all'));
                 
-                // Add category buttons
+                
                 categories.forEach(category => {
                     buttonsContainer.append('button')
                         .attr('class', 'category-btn')
@@ -755,7 +755,7 @@
                         .on('click', () => this.handleCategoryClick(category));
                 });
                 
-                // Add subcategory toggle
+                
                 const toggleContainer = controlsDiv.append('div')
                     .attr('class', 'subcategory-toggle');
                 
@@ -797,7 +797,7 @@
                 d3.select(`[data-category="${category}"]`).classed('active', true);
                 this.currentCategory = category;
                 
-                // Reset subcategories to OFF when switching categories
+                
                 this.showSubcategories = false;
                 const toggle = d3.select('#subcategoryToggle');
                 const toggleBtn = d3.select('.toggle-btn');
@@ -821,21 +821,21 @@
             createBubblesInitial() {
                 console.log(`🔄 Creating initial ${this.filteredData.length} bubbles`);
                 
-                // Professional layout with proper spacing
+                
                 const visualWidth = this.width - 300;
                 const visualHeight = this.height - 90;
                 const packSize = Math.min(visualWidth, visualHeight - 50);
                 
                 const pack = d3.pack()
                     .size([packSize, packSize])
-                    .padding(5); // More padding for clear separation
+                    .padding(5); 
                 
                 const root = d3.hierarchy({children: this.filteredData}).sum(d => 1);
                 pack(root);
                 
-                // Center horizontally, positioned below artist labels with proper spacing
+                
                 const offsetX = (this.width - packSize) / 2;
-                const offsetY = 0; // Fixed position with space below artist labels
+                const offsetY = 0; 
                 
                 this.svg.selectAll('.bubble').remove();
                 
@@ -925,18 +925,18 @@
             
             createPackedLayout() {
                 const visualWidth = this.width - 400;
-                const visualHeight = this.height - 120; // Reduced
+                const visualHeight = this.height - 120; 
                 const packSize = Math.min(visualWidth, visualHeight - 80);
                 
                 const pack = d3.pack()
                     .size([packSize, packSize])
-                    .padding(3); // More padding
+                    .padding(3); 
                 
                 const root = d3.hierarchy({children: this.filteredData}).sum(d => 1);
                 pack(root);
                 
                 const offsetX = (this.width - packSize) / 2;
-                const offsetY = 120 + (this.height - 120 - packSize) / 2; // Much higher
+                const offsetY = 120 + (this.height - 120 - packSize) / 2; 
                 
                 this.bubbles.each(function(d, i) {
                     const bubble = d3.select(this);
@@ -965,7 +965,7 @@
                 const kendrickData = this.filteredData.filter(d => d.artist === 'Kendrick');
                 const drakeData = this.filteredData.filter(d => d.artist === 'Drake');
                 
-                // Remove any existing subcategory labels
+                
                 d3.select('.viz-container').selectAll('.subcategory-labels').remove();
                 
                 if (this.showSubcategories) {
@@ -978,14 +978,14 @@
             }
             
             createSimpleSplitLayout(kendrickData, drakeData) {
-                // Professional aligned layout
-                const centerX = this.width / 2;
-                const kendrickCenterX = centerX - 200; // Perfectly aligned left of center
-                const drakeCenterX = centerX + 200; // Perfectly aligned right of center
-                const centerY = 200; // Fixed position below artist labels
                 
-                const packSize = Math.min(300, this.height - 300); // Consistent size
-                const pack = d3.pack().size([packSize, packSize]).padding(6); // More padding for clarity
+                const centerX = this.width / 2;
+                const kendrickCenterX = centerX - 200; 
+                const drakeCenterX = centerX + 200; 
+                const centerY = 200; 
+                
+                const packSize = Math.min(300, this.height - 300); 
+                const pack = d3.pack().size([packSize, packSize]).padding(6); 
                 
                 let kendrickRoot = null, drakeRoot = null;
                 
@@ -1063,44 +1063,44 @@
             }
             
             layoutSubcategoryGroups(kendrickSubcats, drakeSubcats, labelsContainer) {
-                // Get all unique subcategories from both artists
+                
                 const allSubcategories = new Set([
                     ...kendrickSubcats.keys(),
                     ...drakeSubcats.keys()
                 ]);
                 
                 const centerX = this.width / 2;
-                const startY = 180; // Below artist labels
-                const rowHeight = 120; // Space between subcategory rows
+                const startY = 180; 
+                const rowHeight = 120; 
                 
                 let bubblePositions = [];
                 
                 console.log(`🏷️ Creating centered subcategory layout for ${allSubcategories.size} subcategories`);
                 
-                // Layout each subcategory in rows
+                
                 Array.from(allSubcategories).forEach((subcat, i) => {
                     const rowY = startY + (i * rowHeight);
                     const kendrickData = kendrickSubcats.get(subcat) || [];
                     const drakeData = drakeSubcats.get(subcat) || [];
                     
-                    // Create label in center
+                    
                     const labelX = centerX;
                     const labelY = rowY - 30;
                     
                     labelsContainer.append('div')
                         .attr('class', 'subcategory-label center')
-                        .style('left', labelX + 'px') // Center positioned
+                        .style('left', labelX + 'px') 
                         .style('top', labelY + 'px')
                         .text(subcat);
                     
-                    // Layout Kendrick bubbles on left side
+                    
                     if (kendrickData.length > 0) {
                         const kendrickGroupSize = Math.min(150, 60 + kendrickData.length * 3);
                         const kendrickPack = d3.pack().size([kendrickGroupSize, kendrickGroupSize]).padding(4);
                         const kendrickRoot = d3.hierarchy({children: kendrickData}).sum(d => 1);
                         kendrickPack(kendrickRoot);
                         
-                        const kendrickCenterX = centerX - 150; // Left of center
+                        const kendrickCenterX = centerX - 150; 
                         
                         kendrickData.forEach((d, j) => {
                             if (kendrickRoot.children && kendrickRoot.children[j]) {
@@ -1113,14 +1113,14 @@
                         });
                     }
                     
-                    // Layout Drake bubbles on right side
+                    
                     if (drakeData.length > 0) {
                         const drakeGroupSize = Math.min(150, 60 + drakeData.length * 3);
                         const drakePack = d3.pack().size([drakeGroupSize, drakeGroupSize]).padding(4);
                         const drakeRoot = d3.hierarchy({children: drakeData}).sum(d => 1);
                         drakePack(drakeRoot);
                         
-                        const drakeCenterX = centerX + 150; // Right of center
+                        const drakeCenterX = centerX + 150; 
                         
                         drakeData.forEach((d, j) => {
                             if (drakeRoot.children && drakeRoot.children[j]) {
@@ -1134,7 +1134,7 @@
                     }
                 });
                 
-                // Animate bubbles to new positions
+                
                 this.bubbles.each(function(d) {
                     const bubble = d3.select(this);
                     const position = bubblePositions.find(p => 
@@ -1211,10 +1211,10 @@
             }
         }
         
-        // Initialize the visualization
+        
         const viz = new DrakeKendrickVisualization();
 
-        // Help modal functionality
+        
         document.getElementById('helpButton').addEventListener('click', function() {
             document.getElementById('helpModal').classList.add('show');
         });
@@ -1223,7 +1223,7 @@
             document.getElementById('helpModal').classList.remove('show');
         });
 
-        // Close modal when clicking outside
+        
         document.getElementById('helpModal').addEventListener('click', function(e) {
             if (e.target === this) {
                 this.classList.remove('show');
