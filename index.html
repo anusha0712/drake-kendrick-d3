@@ -881,6 +881,7 @@
                 if (category === 'all') {
                     this.filteredData = [...this.data];
                     this.currentMode = 'all';
+                    d3.select('.viz-container').selectAll('.subcategory-labels').remove();
                     this.createBubblesInitial();
                 } else {
                     this.filteredData = this.data.filter(d => d.category === category);
