@@ -634,7 +634,13 @@
                     this.width = window.innerWidth;
                     this.height = window.innerHeight;
                     this.svg.attr('width', this.width).attr('height', this.height);
-                    this.updateLayout();
+
+                    
+                    if (this.currentMode === 'all') {
+                        this.createBubblesInitial();
+                    } else {
+                        this.updateLayout();
+                    }
                 });
             }
             
